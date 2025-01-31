@@ -158,7 +158,7 @@ def extract_data_retail_sales_from_excel(file_path):
         "Route Type": route_type,
         "Year Built": ws["G91"].value,       
         "Sold Price": ws["C45"].value,
-        "Sale Date": ws["C70"].value,
+        "Sale Date": format_date(ws["C70"].value),
         "Price PSF": format_currency(ws["F72"].value),
         "Client": ws["B3"].value,
         "Vendor_Company": ws["B5"].value,
@@ -243,7 +243,7 @@ def index():
             df = df.reindex(columns=column_order)
 
             # Save to Excel
-            output_path = os.path.join(UPLOAD_FOLDER, "Winnipeg_Lease_Data.xlsx")
+            output_path = os.path.join(UPLOAD_FOLDER, "data_record.xlsx")
             df.to_excel(output_path, index=False)
 
             return render_template("result.html", data_type=data_type, data=final_data, file_path=output_path)
@@ -302,12 +302,25 @@ def index():
             df = df.reindex(columns=column_order)
 
             # Save to Excel
-            output_path = os.path.join(UPLOAD_FOLDER, "Winnipeg_Lease_Data.xlsx")
+            output_path = os.path.join(UPLOAD_FOLDER, "data_record.xlsx")
             df.to_excel(output_path, index=False)
 
             return render_template("result.html", data_type=data_type, data=final_data, file_path=output_path)
 
     return render_template("index.html")
+
+from flask import send_file
+
+@app.route("/download")
+def download_file():
+    """Serves the generated Excel file for download."""
+    file_path = os.path.join(app.config["UPLOAD_FOLDER"], "data_record.xlsx")
+
+    if os.path.exists(file_path):
+        return send_file(file_path, as_attachment=True)
+    else:
+        return "File not found", 404
+
 
 if __name__ == "__main__":
     app.run(debug=True)
